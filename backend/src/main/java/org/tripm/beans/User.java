@@ -7,6 +7,7 @@ public class User {
     private int id;
     private String username;
     private String email;
+    private String password;
     private List<Destination> favorites = new ArrayList<>();
 
     public int getId() {
@@ -39,5 +40,13 @@ public class User {
 
     public void setFavorites(List<Destination> favorites) {
         this.favorites = favorites;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
