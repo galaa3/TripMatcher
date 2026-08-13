@@ -43,7 +43,7 @@ public class UserDAO {
     public User checkCredentials(String username, String plainPassword){
         User user = null;
 
-        String sql = "SELECT id, username, email, password FROM users WHERE username = ?";
+        String sql = "SELECT id, username, email, password FROM User WHERE username = ?";
 
         try (Connection conn = ConnectionHandler.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

@@ -76,6 +76,7 @@
 }
 
 .form-submit-btn {
+    margin-bottom: 20px;
     padding: 12px;
     background-color: #007BFF;
     color: white;
