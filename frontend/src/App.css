@@ -29,6 +29,12 @@
     text-decoration: none;
     font-weight: bold;
     transition: background-color 0.3s;
+    font-family: inherit;
+    font-size: inherit;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    display: inline-block;
 }
 
 .nav-login-btn:hover {

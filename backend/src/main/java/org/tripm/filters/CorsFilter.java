@@ -30,6 +30,8 @@ public class CorsFilter implements Filter {
         res.setHeader("Access-Control-Allow-Origin", frontendUrl);
         res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        // required for cookie-based session
+        res.setHeader("Access-Control-Allow-Credentials", "true");
 
         if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
             res.setStatus(HttpServletResponse.SC_OK);

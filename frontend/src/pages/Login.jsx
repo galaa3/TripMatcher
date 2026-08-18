@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+// so this can take setUser from context for saving user in the session
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
     // React memory
@@ -8,6 +10,7 @@ const Login = () => {
     const [errorMsg, setErrorMsg] = useState('');
 
     const navigate = useNavigate();
+    const { setUser } = useAuth();
 
     const handleLogin = async(e) => {
         e.preventDefault();
@@ -16,6 +19,7 @@ const Login = () => {
         try{
             const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/signin`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -28,9 +32,7 @@ const Login = () => {
             const data = await response.json();
 
             if(data.success){
-                // testing
-                console.log("User from DB: ", data.user);
-
+                setUser(data.user);
                 navigate('/');
             }else{
                 setErrorMsg(data.message);
@@ -71,7 +73,7 @@ const Login = () => {
             </form>
 
             <div className="form-footer">
-                Non hai ancora un account?{' '}
+                Not an account yet?{' '}
                 <Link to="/signup" className="form-link">Sign up here</Link>
             </div>
         </div>

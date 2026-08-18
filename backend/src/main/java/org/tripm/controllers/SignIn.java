@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.tripm.beans.User;
 import org.tripm.dao.UserDAO;
 
@@ -37,6 +38,14 @@ public class SignIn extends HttpServlet {
 
             if (loggedUser != null) {
                 resp.setStatus(HttpServletResponse.SC_OK); // 200
+
+                HttpSession oldSession = req.getSession(false);
+                if (oldSession != null) {
+                    oldSession.invalidate();
+                }
+                HttpSession session = req.getSession(true);
+                session.setAttribute("user", loggedUser);
+                session.setMaxInactiveInterval(30 * 60);
 
                 loggedUser.setPassword(null);
                 String userJson = gson.toJson(loggedUser);
