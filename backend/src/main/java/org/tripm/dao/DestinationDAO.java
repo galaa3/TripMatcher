@@ -12,7 +12,15 @@ import java.util.List;
 
 public class DestinationDAO {
 
-    public List<Destination> findMatchingDestination(int month, int nights, double maxBudget, DestCategory category){
+    /**
+     * Matches destinations based of user needs
+     * @param month
+     * @param nights
+     * @param maxBudget
+     * @param category
+     * @return
+     */
+    public List<Destination> findMatchingDestinations(int month, int nights, double maxBudget, DestCategory category){
         List<Destination> results = new ArrayList<>();
 
         String sql = """
