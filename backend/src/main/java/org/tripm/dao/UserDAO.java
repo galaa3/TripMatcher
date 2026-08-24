@@ -67,7 +67,7 @@ public class UserDAO {
 
         } catch (SQLException e) {
             // In produzione usa un logger (es. SLF4J), per ora stampiamo l'errore
-            System.err.println("Errore durante il controllo delle credenziali: " + e.getMessage());
+            System.err.println("checkCredentials failed: " + e.getMessage());
         }
         return user;
     }
