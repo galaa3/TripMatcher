@@ -34,9 +34,9 @@ public class DestinationDAO {
 
         boolean hasCategory = category != null;
         if(hasCategory){
-           sql += " AND d.category = ? " +
-                   " ORDER BY total_cost ASC";
+           sql += " AND d.category = ? ";
         }
+        sql += " ORDER BY total_cost ASC";
 
         try(Connection conn = ConnectionHandler.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql)){
@@ -55,7 +55,7 @@ public class DestinationDAO {
                     dest.setCity(rs.getString("city"));
                     String categoryStr = rs.getString("category");
                     if(categoryStr != null && !categoryStr.trim().isEmpty())
-                        dest.setCategory(DestCategory.valueOf(categoryStr));
+                        dest.setCategory(DestCategory.valueOf(categoryStr.toUpperCase()));
                     dest.setDescription(rs.getString("description"));
                     dest.setImageUrl(rs.getString("image_url"));
                     dest.setAvgFlight(rs.getDouble("avg_flight_per_person"));

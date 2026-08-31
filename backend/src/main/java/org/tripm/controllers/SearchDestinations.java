@@ -22,7 +22,7 @@ public class SearchDestinations extends HttpServlet {
     private final Gson gson = new Gson();
     private final DestinationDAO destinationDao = new DestinationDAO();
 
-    private class SearchPayload{
+    private static class SearchPayload{
         int month;
         int nights;
         double maxBudget;
@@ -45,11 +45,15 @@ public class SearchDestinations extends HttpServlet {
                 return;
             }
 
+            DestCategory categoryEnum = null;
+            if(data.category != null){
+                categoryEnum = DestCategory.valueOf(data.category.toUpperCase());
+            }
             List<Destination> results = destinationDao.findMatchingDestinations(
                     data.month,
                     data.nights,
                     data.maxBudget,
-                    DestCategory.valueOf(data.category)
+                    categoryEnum
             );
 
             resp.setStatus(HttpServletResponse.SC_OK); // 200
