@@ -3,12 +3,14 @@ import mysql from 'mysql2/promise';
 import fetch from 'node-fetch';
 
 /**
- * bot to popolate db with destinations general data and prices
+ * Bot to populate DB with destinations general data and prices.
+ * Integrates Unsplash for images and Travelpayouts for flights.
+ * Hotel prices are algorithmically simulated for realism.
  */
 
 const UNSPLASH_KEY = process.env.UNSPLASH_KEY;
 const TRAVELPAYOUTS_TOKEN = process.env.TRAVELPAYOUTS_TOKEN;
-const ORIGIN_IATA = 'MIL'; // Partenza di default (es. Milano)
+const ORIGIN_IATA = 'MIL';
 
 const targetDestinations = [
     { city: "Paris", iata: "CDG", category: "citta", description: "The City of Light, offering world-class art, fashion, and the iconic Eiffel Tower." },
@@ -58,9 +60,7 @@ const targetDestinations = [
     { city: "Las Vegas", iata: "LAS", category: "citta", description: "An oasis of entertainment in the Mojave Desert, famous for vibrant nightlife and 24-hour casinos." },
     { city: "Hong Kong", iata: "HKG", category: "citta", description: "A major financial hub boasting a famous skyline, deep natural harbor, and a dense, vibrant street life." },
     { city: "Taipei", iata: "TPE", category: "citta", description: "A modern metropolis with bustling night markets, ancient temples, and the towering Taipei 101." },
-    { city: "Osaka", iata: "KIX", category: "citta", description: "Japan's kitchen, renowned for its modern architecture, vibrant nightlife, and exceptional street food." },
-    { city: "Shanghai", iata: "PVG", category: "citta", description: "China's biggest city, blending traditional pavilions with a hyper-modern financial district skyline." },
-    { city: "Milan", iata: "MXP", category: "citta", description: "A global capital of fashion and design, home to the magnificent Gothic Duomo and high-end boutiques." }
+    { city: "Osaka", iata: "KIX", category: "citta", description: "Japan's kitchen, renowned for its modern architecture, vibrant nightlife, and exceptional street food." }
 ];
 
 async function runBot() {
@@ -77,43 +77,71 @@ async function runBot() {
         console.log(`\nProcessing: ${dest.city}...`);
 
         try {
-            //  retrieving the image from Unsplash.
+            // 1. Retrieving the image from Unsplash with safety checks
             let imageUrl = null;
             const unsplashRes = await fetch(`https://api.unsplash.com/search/photos?query=${dest.city} city landscape&orientation=landscape&client_id=${UNSPLASH_KEY}`);
+
+            if (!unsplashRes.ok) {
+                const errorText = await unsplashRes.text();
+                throw new Error(`Unsplash API blocked or in error: ${errorText}`);
+            }
+
             const unsplashData = await unsplashRes.json();
 
             if (unsplashData.results && unsplashData.results.length > 0) {
-                // taking the "regular" link for the image provided by Unsplash.
                 imageUrl = unsplashData.results[0].urls.regular;
             }
 
-            // Inserting and updating destinations data in db
+            // 2. Inserting and updating destination data in DB
             const [result] = await db.execute(`
                 INSERT INTO destination (city, category, description, image_url, iata_code)
                 VALUES (?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE image_url = VALUES(image_url), description = VALUES(description)
+                    ON DUPLICATE KEY UPDATE image_url = VALUES(image_url), description = VALUES(description)
             `, [dest.city, dest.category, dest.description, imageUrl, dest.iata]);
 
-            // retrieving the ID (whether just created or already existing).
+            // Retrieving the ID (whether just created or already existing)
             const [[existingDest]] = await db.execute('SELECT id FROM destination WHERE city = ?', [dest.city]);
             const destId = existingDest.id;
 
-            // Retrieving prices from Travelpayouts
+            // 3. Retrieving flight prices from Travelpayouts
             const pricesRes = await fetch(`https://api.travelpayouts.com/v1/prices/monthly?currency=EUR&origin=${ORIGIN_IATA}&destination=${dest.iata}&token=${TRAVELPAYOUTS_TOKEN}`);
             const pricesData = await pricesRes.json();
 
             if (pricesData.success && pricesData.data) {
+                // 4. Pure Algorithmic Projection Logic for Hotel Prices
                 for (const [yearMonth, flightData] of Object.entries(pricesData.data)) {
                     const month = parseInt(yearMonth.split('-')[1]);
                     const flightPrice = flightData.price;
-                    const estimatedHotel = 100.00; // Fixed value for now
 
-                    // inserting the monthly trends
+                    // Set base price according to destination category
+                    let baseHotelPrice = 70;
+                    if (dest.category === 'montagna') baseHotelPrice += 60;
+                    else if (dest.category === 'citta') baseHotelPrice += 50;
+                    else if (dest.category === 'mare') baseHotelPrice += 30;
+
+                    // Correlate hotel price partially to flight price to reflect global destination cost
+                    const marketVariance = flightPrice * 0.15;
+                    let finalHotelPrice = baseHotelPrice + marketVariance;
+
+                    // Seasonality adjustments
+                    if ([7, 8, 12].includes(month)) {
+                        finalHotelPrice *= 1.5; // Peak season surcharge (50%)
+                    } else if ([1, 2, 11].includes(month) && dest.category !== 'montagna') {
+                        finalHotelPrice *= 0.75; // Low season discount (25%) - excluding mountains
+                    }
+
+                    // Adding 5-10% randomness for organic realism
+                    const randomVariance = 1 + (Math.random() * 0.1 - 0.05);
+                    finalHotelPrice = Math.round(finalHotelPrice * randomVariance);
+
+                    // Inserting the monthly trends, updating accommodation on duplicate
                     await db.execute(`
                         INSERT INTO price_trends (destination_id, reference_month, avg_flight_per_person, avg_accomodation_per_night)
                         VALUES (?, ?, ?, ?)
-                        ON DUPLICATE KEY UPDATE avg_flight_per_person = VALUES(avg_flight_per_person)
-                    `, [destId, month, flightPrice, estimatedHotel]);
+                            ON DUPLICATE KEY UPDATE
+                                                 avg_flight_per_person = VALUES(avg_flight_per_person),
+                                                 avg_accomodation_per_night = VALUES(avg_accomodation_per_night)
+                    `, [destId, month, flightPrice, finalHotelPrice]);
                 }
                 console.log(`Prices and images saved for ${dest.city}`);
             } else {

@@ -109,7 +109,7 @@ const Home = () => {
                             <p><em>{dest.category.toUpperCase()}</em></p>
                             <p>{dest.description}</p>
                             <hr />
-                            <h4 style={{ color: '#2ecc71' }}>Costo stimato: {dest.totalEstimatedCost} €</h4>
+                            <h4 style={{ color: '#2ecc71' }}>Starting from: {dest.totalEstimatedCost} €</h4>
                             <p style={{ fontSize: '0.85em', color: '#666' }}>(Volo: {dest.avgFlight}€ + Hotel: {dest.avgAccomodation}€ a notte)</p>
                         </div>
                     ))}
