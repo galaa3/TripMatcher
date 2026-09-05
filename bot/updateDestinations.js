@@ -10,7 +10,7 @@ import fetch from 'node-fetch';
 
 const UNSPLASH_KEY = process.env.UNSPLASH_KEY;
 const TRAVELPAYOUTS_TOKEN = process.env.TRAVELPAYOUTS_TOKEN;
-const ORIGIN_IATA = 'MIL';
+const ORIGIN_IATA = ['MIL'];
 
 const targetDestinations = [
     { city: "Paris", iata: "CDG", category: "citta", description: "The City of Light, offering world-class art, fashion, and the iconic Eiffel Tower." },
@@ -104,50 +104,56 @@ async function runBot() {
             const destId = existingDest.id;
 
             // 3. Retrieving flight prices from Travelpayouts
-            const pricesRes = await fetch(`https://api.travelpayouts.com/v1/prices/monthly?currency=EUR&origin=${ORIGIN_IATA}&destination=${dest.iata}&token=${TRAVELPAYOUTS_TOKEN}`);
-            const pricesData = await pricesRes.json();
+            for(const origin of ORIGIN_IATA) {
+                const pricesRes = await fetch(`https://api.travelpayouts.com/v1/prices/monthly?currency=EUR&origin=${ORIGIN_IATA}&destination=${dest.iata}&token=${TRAVELPAYOUTS_TOKEN}`);
+                const pricesData = await pricesRes.json();
 
-            if (pricesData.success && pricesData.data) {
-                // 4. Pure Algorithmic Projection Logic for Hotel Prices
-                for (const [yearMonth, flightData] of Object.entries(pricesData.data)) {
-                    const month = parseInt(yearMonth.split('-')[1]);
-                    const flightPrice = flightData.price;
+                if (pricesData.success && pricesData.data) {
+                    // 4. Pure Algorithmic Projection Logic for Hotel Prices
+                    for (const [yearMonth, flightData] of Object.entries(pricesData.data)) {
+                        const month = parseInt(yearMonth.split('-')[1]);
+                        const flightPrice = flightData.price;
 
-                    // Set base price according to destination category
-                    let baseHotelPrice = 70;
-                    if (dest.category === 'montagna') baseHotelPrice += 60;
-                    else if (dest.category === 'citta') baseHotelPrice += 50;
-                    else if (dest.category === 'mare') baseHotelPrice += 30;
+                        // Set base price according to destination category
+                        let baseHotelPrice = 70;
+                        if (dest.category === 'montagna') baseHotelPrice += 60;
+                        else if (dest.category === 'citta') baseHotelPrice += 50;
+                        else if (dest.category === 'mare') baseHotelPrice += 30;
 
-                    // Correlate hotel price partially to flight price to reflect global destination cost
-                    const marketVariance = flightPrice * 0.15;
-                    let finalHotelPrice = baseHotelPrice + marketVariance;
+                        // Correlate hotel price partially to flight price to reflect global destination cost
+                        const marketVariance = flightPrice * 0.15;
+                        let finalHotelPrice = baseHotelPrice + marketVariance;
 
-                    // Seasonality adjustments
-                    if ([7, 8, 12].includes(month)) {
-                        finalHotelPrice *= 1.5; // Peak season surcharge (50%)
-                    } else if ([1, 2, 11].includes(month) && dest.category !== 'montagna') {
-                        finalHotelPrice *= 0.75; // Low season discount (25%) - excluding mountains
+                        // Seasonality adjustments
+                        if ([7, 8, 12].includes(month)) {
+                            finalHotelPrice *= 1.5; // Peak season surcharge (50%)
+                        } else if ([1, 2, 11].includes(month) && dest.category !== 'montagna') {
+                            finalHotelPrice *= 0.75; // Low season discount (25%) - excluding mountains
+                        }
+
+                        // Adding 5-10% randomness for organic realism
+                        const randomVariance = 1 + (Math.random() * 0.1 - 0.05);
+                        finalHotelPrice = Math.round(finalHotelPrice * randomVariance);
+
+                        // Inserting the monthly trends, updating accommodation on duplicate
+                        await db.execute(`
+                            INSERT INTO price_trends (destination_id, reference_month, avg_flight_per_person,
+                                                      avg_accomodation_per_night, origin_iata)
+                            VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY
+                            UPDATE
+                                avg_flight_per_person =
+                            VALUES (avg_flight_per_person), avg_accomodation_per_night =
+                            VALUES (avg_accomodation_per_night)
+                        `, [destId, month, flightPrice, finalHotelPrice, origin]);
                     }
-
-                    // Adding 5-10% randomness for organic realism
-                    const randomVariance = 1 + (Math.random() * 0.1 - 0.05);
-                    finalHotelPrice = Math.round(finalHotelPrice * randomVariance);
-
-                    // Inserting the monthly trends, updating accommodation on duplicate
-                    await db.execute(`
-                        INSERT INTO price_trends (destination_id, reference_month, avg_flight_per_person, avg_accomodation_per_night)
-                        VALUES (?, ?, ?, ?)
-                            ON DUPLICATE KEY UPDATE
-                                                 avg_flight_per_person = VALUES(avg_flight_per_person),
-                                                 avg_accomodation_per_night = VALUES(avg_accomodation_per_night)
-                    `, [destId, month, flightPrice, finalHotelPrice]);
+                    console.log(`Prices and images saved for ${dest.city} (From: ${origin})`);
+                } else {
+                    console.log(`No flights found for ${dest.city} (From: ${origin})`);
                 }
-                console.log(`Prices and images saved for ${dest.city}`);
-            } else {
-                console.log(`No flights found for ${dest.city}`);
-            }
 
+                // Timeout between two flights API calls (case of more than 1 origin_iata)
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
         } catch (error) {
             console.error(`Error with ${dest.city}:`, error.message);
         }

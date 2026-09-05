@@ -23,6 +23,7 @@ public class SearchDestinations extends HttpServlet {
     private final DestinationDAO destinationDao = new DestinationDAO();
 
     private static class SearchPayload{
+        String origin;
         int month;
         int nights;
         double maxBudget;
@@ -39,7 +40,7 @@ public class SearchDestinations extends HttpServlet {
             BufferedReader reader = req.getReader();
             SearchPayload data = gson.fromJson(reader, SearchPayload.class);
 
-            if (data == null || data.maxBudget <= 0 || data.nights <= 0) {
+            if (data == null || data.maxBudget <= 0 || data.nights <= 0 || data.origin == null || data.origin.trim().isEmpty()) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST); // 400
                 out.print("{\"success\": false, \"message\": \"Invalid parameters.\"}");
                 return;
@@ -50,6 +51,7 @@ public class SearchDestinations extends HttpServlet {
                 categoryEnum = DestCategory.valueOf(data.category.toUpperCase());
             }
             List<Destination> results = destinationDao.findMatchingDestinations(
+                    data.origin,
                     data.month,
                     data.nights,
                     data.maxBudget,

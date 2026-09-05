@@ -1,7 +1,18 @@
 import { useState } from 'react';
 import './Home.css';
 
+const airportsList = [
+    { code: 'MIL', label: 'Milano (Tutti gli aeroporti)' },
+    { code: 'FCO', label: 'Roma (Fiumicino)' },
+    { code: 'NAP', label: 'Napoli (Capodichino)' },
+    { code: 'BLQ', label: 'Bologna (Guglielmo Marconi)' }
+];
+
 const Home = () => {
+    const [origin, setOrigin] = useState('MIL');
+    const [originSearch, setOriginSearch] = useState('');
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
     const [month, setMonth] = useState(8);
     const [nights, setNights] = useState(4);
     const [maxBudget, setMaxBudget] = useState(600);
@@ -11,6 +22,11 @@ const Home = () => {
     const [hasSearched, setHasSearched] = useState(false);
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+
+    const filteredAirports = airportsList.filter(airport =>
+        airport.label.toLowerCase().includes(originSearch.toLowerCase()) ||
+        airport.code.toLowerCase().includes(originSearch.toLowerCase())
+    );
 
     const handleSearch = async (e) => {
         e.preventDefault();
@@ -26,6 +42,7 @@ const Home = () => {
                 },
                 // using parse because variables from html forms are strings by default
                 body: JSON.stringify({
+                    origin: origin,
                     month: parseInt(month),
                     nights: parseInt(nights),
                     maxBudget: parseFloat(maxBudget),
@@ -55,6 +72,70 @@ const Home = () => {
                 <p style={{ fontSize: '1.0rem', color: '#555'}}>Let's start to plan your dream's travel</p>
 
                 <form className="search-form" onSubmit={handleSearch}>
+
+                    <div className="form-group" style={{ position: 'relative' }}>
+                        <label>Departure from</label>
+                        <input
+                            type="text"
+                            value={originSearch}
+                            onChange={(e) => {
+                                setOriginSearch(e.target.value);
+                                setIsDropdownOpen(true);
+                            }}
+                            onFocus={() => {
+                                setIsDropdownOpen(true);
+                                setOriginSearch('');
+                            }}
+                            // The timeout allows time for the click on the list item (li) to register before the list disappears.                            onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
+                            placeholder="Search for an airport..."
+                            required
+                        />
+                        {isDropdownOpen && (
+                            <ul style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: 0,
+                                right: 0,
+                                backgroundColor: 'white',
+                                border: '1px solid #ccc',
+                                borderRadius: '4px',
+                                zIndex: 10,
+                                listStyle: 'none',
+                                padding: 0,
+                                margin: '5px 0 0 0',
+                                maxHeight: '200px',
+                                overflowY: 'auto',
+                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                            }}>
+                                {filteredAirports.length > 0 ? (
+                                    filteredAirports.map(airport => (
+                                        <li
+                                            key={airport.code}
+                                            onClick={() => {
+                                                setOrigin(airport.code);
+                                                setOriginSearch(airport.label);
+                                                setIsDropdownOpen(false);
+                                            }}
+                                            style={{
+                                                padding: '10px',
+                                                cursor: 'pointer',
+                                                borderBottom: '1px solid #f0f0f0',
+                                                color: '#333',
+                                                textAlign: 'left'
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = '#f9f9f9'}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                                        >
+                                            {airport.label} <strong>({airport.code})</strong>
+                                        </li>
+                                    ))
+                                ) : (
+                                    <li style={{ padding: '10px', color: '#999' }}>No airport found</li>
+                                )}
+                            </ul>
+                        )}
+                    </div>
+
                     <div className="form-group">
                         <label>Month</label>
                         <select value={month} onChange={(e) => setMonth(e.target.value)}>
@@ -74,12 +155,12 @@ const Home = () => {
                     </div>
 
                     <div className="form-group">
-                        <label>Nights</label>
+                        <label>Nights (double room)</label>
                         <input type="number" min="1" value={nights} onChange={(e) => setNights(e.target.value)} required />
                     </div>
 
                     <div className="form-group">
-                        <label>Total Budget (€)</label>
+                        <label>Total Budget x1 (€)</label>
                         <input type="number" min="50" step="50" value={maxBudget} onChange={(e) => setMaxBudget(e.target.value)} required />
                     </div>
 
@@ -94,18 +175,18 @@ const Home = () => {
                     </div>
 
                     <button type="submit" className="form-submit-btn" disabled={loading}>
-                        {loading ? 'Ricerca in corso...' : 'Cerca Destinazioni'}
+                        {loading ? 'Search in progress...' : 'Search'}
                     </button>
                 </form>
             </div>
 
-            {/* Sezione Risultati (Cards) */}
+            {/* Results section (Cards) */}
             <div className="results-section">
                 {errorMsg && <p className="errorMsg">{errorMsg}</p>}
 
                 {hasSearched && !loading && destinations.length === 0 && (
                     <p style={{ textAlign: 'center', marginTop: '20px' }}>
-                        Nessuna destinazione trovata per questo budget. Prova ad alzarlo!
+                        No destinations found for this budget. Try increasing it!
                     </p>
                 )}
 

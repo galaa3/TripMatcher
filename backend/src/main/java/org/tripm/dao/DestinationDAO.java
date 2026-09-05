@@ -20,7 +20,7 @@ public class DestinationDAO {
      * @param category
      * @return
      */
-    public List<Destination> findMatchingDestinations(int month, int nights, double maxBudget, DestCategory category){
+    public List<Destination> findMatchingDestinations(String origin, int month, int nights, double maxBudget, DestCategory category){
         List<Destination> results = new ArrayList<>();
 
         String sql = """
@@ -28,7 +28,8 @@ public class DestinationDAO {
                 pt.avg_flight_per_person, pt.avg_accomodation_per_night,
                 (pt.avg_flight_per_person + (pt.avg_accomodation_per_night * ?)) AS total_cost
                 FROM destination d JOIN price_trends pt ON d.id = pt.destination_id
-                WHERE pt.reference_month = ? 
+                WHERE pt.reference_month = ?
+                AND pt.origin_iata = ?
                 AND (pt.avg_flight_per_person + (pt.avg_accomodation_per_night * ?)) <= ?  
                 """;
 
@@ -42,11 +43,12 @@ public class DestinationDAO {
             PreparedStatement stmt = conn.prepareStatement(sql)){
             stmt.setInt(1, nights);
             stmt.setInt(2, month);
-            stmt.setInt(3, nights);
-            stmt.setDouble(4, maxBudget);
+            stmt.setString(3, origin);
+            stmt.setInt(4, nights);
+            stmt.setDouble(5, maxBudget);
 
             if(hasCategory)
-                stmt.setString(5, category.name());
+                stmt.setString(6, category.name());
 
             try(ResultSet rs = stmt.executeQuery()){
                 while(rs.next()){
