@@ -1,4 +1,4 @@
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 import { useAuth } from './context/AuthContext';
 
@@ -11,10 +11,30 @@ import DestinationDetail from './pages/DestinationDetails';
 function App() {
     const { user, loading, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation(); // We need it to know which page we're on.
 
     const handleLogout = async () => {
         await logout();
         navigate('/');
+    };
+
+    const handleLogoClick = (e) => {
+        e.preventDefault(); // Blocca la navigazione standard del <Link>
+
+        // 1. Elimina solo i dati di ricerca dal sessionStorage (lasciando intatti eventuali token di login)
+        const keysToRemove = [
+            'search_origin', 'search_originSearch', 'search_month',
+            'search_nights', 'search_maxBudget', 'search_category',
+            'search_destinations', 'search_hasSearched'
+        ];
+        keysToRemove.forEach(key => sessionStorage.removeItem(key));
+
+        // 2. Naviga alla Home. Se ci siamo già, forza un refresh per resettare gli stati di React.
+        if (location.pathname === '/') {
+            window.location.reload();
+        } else {
+            navigate('/');
+        }
     };
 
     return (
@@ -23,7 +43,7 @@ function App() {
             {/* NAVBAR */}
             <nav className="navbar">
                 <div>
-                    <Link to="/" className="nav-brand">TripMatcher</Link>
+                    <Link to="/" onClick={handleLogoClick} className="nav-brand">TripMatcher</Link>
                 </div>
                 <div>
                     {loading ? null : user ? (
