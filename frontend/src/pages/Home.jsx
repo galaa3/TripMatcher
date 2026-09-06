@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import './Home.css';
+import { useNavigate } from 'react-router-dom';
 
 const airportsList = [
     { code: 'MIL', label: 'Milano (Tutti gli aeroporti)' },
@@ -9,17 +10,21 @@ const airportsList = [
 ];
 
 const Home = () => {
-    const [origin, setOrigin] = useState('MIL');
-    const [originSearch, setOriginSearch] = useState('');
+    const navigate = useNavigate();
+
+    const [origin, setOrigin] = useState(() => sessionStorage.getItem('search_origin') || 'MIL');
+    const [originSearch, setOriginSearch] = useState(() => sessionStorage.getItem('search_originSearch') || 'Milano (Tutti gli aeroporti)');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-    const [month, setMonth] = useState(8);
-    const [nights, setNights] = useState(4);
-    const [maxBudget, setMaxBudget] = useState(600);
-    const [category, setCategory] = useState('Tutte');
+    const [month, setMonth] = useState(() => parseInt(sessionStorage.getItem('search_month')) || 8);
+    const [nights, setNights] = useState(() => parseInt(sessionStorage.getItem('search_nights')) || 4);
+    const [maxBudget, setMaxBudget] = useState(() => parseFloat(sessionStorage.getItem('search_maxBudget')) || 600);
+    const [category, setCategory] = useState(() => sessionStorage.getItem('search_category') || 'Tutte');
 
-    const [destinations, setDestinations] = useState([]);
-    const [hasSearched, setHasSearched] = useState(false);
+    // Il JSON.parse serve perché nel sessionStorage possiamo salvare solo stringhe
+    const [destinations, setDestinations] = useState(() => JSON.parse(sessionStorage.getItem('search_destinations')) || []);
+    const [hasSearched, setHasSearched] = useState(() => sessionStorage.getItem('search_hasSearched') === 'true');
+
     const [loading, setLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
 
@@ -54,6 +59,15 @@ const Home = () => {
 
             if (data.success) {
                 setDestinations(data.data);
+
+                sessionStorage.setItem('search_origin', origin);
+                sessionStorage.setItem('search_originSearch', originSearch);
+                sessionStorage.setItem('search_month', month.toString());
+                sessionStorage.setItem('search_nights', nights.toString());
+                sessionStorage.setItem('search_maxBudget', maxBudget.toString());
+                sessionStorage.setItem('search_category', category);
+                sessionStorage.setItem('search_destinations', JSON.stringify(data.data));
+                sessionStorage.setItem('search_hasSearched', 'true');
             } else {
                 setErrorMsg(data.message || "Server error: matching destinations failed.");
             }
@@ -192,12 +206,19 @@ const Home = () => {
 
                 <div className="destinations-grid" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '30px', justifyContent: 'center' }}>
                     {destinations.map((dest) => (
-                        <div key={dest.id} className="destination-card" style={{ border: '1px solid #ddd', borderRadius: '10px', padding: '15px', width: '300px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
+                        <div
+                            key={dest.id}
+                            className="destination-card"
+                            // handing the 'dest' and 'origin' objects (state object) to react (passing data to 'destination' page)
+                            onClick={() => navigate(`/destination/${dest.id}`, { state: { dest: dest, origin: origin } })}
+                            style={{ border: '1px solid #ddd', borderRadius: '10px', padding: '15px', width: '300px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}
+                        >
                             <img src={dest.imageUrl} alt={dest.city} style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px' }} />
                             <h3>{dest.city}</h3>
-                            <p><em>{dest.category.toUpperCase()}</em></p>
-                            <p>{dest.description}</p>
-                            <hr />
+                            <span style={{ backgroundColor: '#eee', padding: '5px 10px', borderRadius: '15px', fontSize: '0.7rem' }}>
+                                {dest.category.toUpperCase()}
+                            </span>
+
                             <h4 style={{ color: '#2ecc71' }}>Starting from: {dest.totalEstimatedCost} €</h4>
                             <p style={{ fontSize: '0.85em', color: '#666' }}>(Volo: {dest.avgFlight}€ + Hotel: {dest.avgAccomodation}€ a notte)</p>
                         </div>

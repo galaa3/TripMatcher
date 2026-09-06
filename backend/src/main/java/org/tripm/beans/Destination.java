@@ -4,12 +4,13 @@ public class Destination {
     private int id;
     private String city;
     private DestCategory category;
-    private String Description;
+    private String description;
     private String imageUrl;
 
     private double avgFlight;
     private double avgAccomodation;
     private double totalEstimatedCost;
+    private String iataCode;
 
     public int getId() {
         return id;
@@ -36,11 +37,11 @@ public class Destination {
     }
 
     public String getDescription() {
-        return Description;
+        return description;
     }
 
     public void setDescription(String description) {
-        Description = description;
+        this.description = description;
     }
 
     public String getImageUrl() {
@@ -73,5 +74,13 @@ public class Destination {
 
     public void setTotalEstimatedCost(double totalEstimatedCost) {
         this.totalEstimatedCost = totalEstimatedCost;
+    }
+
+    public String getIataCode() {
+        return iataCode;
+    }
+
+    public void setIataCode(String iataCode) {
+        this.iataCode = iataCode;
     }
 }

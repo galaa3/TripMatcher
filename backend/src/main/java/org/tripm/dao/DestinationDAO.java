@@ -24,7 +24,7 @@ public class DestinationDAO {
         List<Destination> results = new ArrayList<>();
 
         String sql = """
-                SELECT d.id, d.city, d.category, d.description, d.image_url, 
+                SELECT d.id, d.city, d.category, d.description, d.image_url, d.iata_code, 
                 pt.avg_flight_per_person, pt.avg_accomodation_per_night,
                 (pt.avg_flight_per_person + (pt.avg_accomodation_per_night * ?)) AS total_cost
                 FROM destination d JOIN price_trends pt ON d.id = pt.destination_id
@@ -63,6 +63,7 @@ public class DestinationDAO {
                     dest.setAvgFlight(rs.getDouble("avg_flight_per_person"));
                     dest.setAvgAccomodation(rs.getDouble("avg_accomodation_per_night"));
                     dest.setTotalEstimatedCost(rs.getDouble("total_cost"));
+                    dest.setIataCode(rs.getString("iata_code"));
 
                     results.add(dest);
                 }

@@ -6,6 +6,7 @@ import { useAuth } from './context/AuthContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import SignUp from './pages/Signup';
+import DestinationDetail from './pages/DestinationDetails';
 
 function App() {
     const { user, loading, logout } = useAuth();
@@ -42,6 +43,7 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<SignUp />} />
+                    <Route path="/destination/:id" element={<DestinationDetail />} />
                 </Routes>
             </main>
 

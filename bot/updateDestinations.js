@@ -10,7 +10,7 @@ import fetch from 'node-fetch';
 
 const UNSPLASH_KEY = process.env.UNSPLASH_KEY;
 const TRAVELPAYOUTS_TOKEN = process.env.TRAVELPAYOUTS_TOKEN;
-const ORIGIN_IATA = ['MIL'];
+const ORIGIN_IATA = ['FCO'];
 
 const targetDestinations = [
     { city: "Paris", iata: "CDG", category: "citta", description: "The City of Light, offering world-class art, fashion, and the iconic Eiffel Tower." },
