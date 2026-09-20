@@ -3,9 +3,9 @@ import './Home.css';
 import { useNavigate } from 'react-router-dom';
 
 const airportsList = [
-    { code: 'MIL', label: 'Milano (Tutti gli aeroporti)' },
-    { code: 'FCO', label: 'Roma (Fiumicino)' },
-    { code: 'NAP', label: 'Napoli (Capodichino)' },
+    { code: 'MIL', label: 'Milan (all airports)' },
+    { code: 'FCO', label: 'Rome (Fiumicino)' },
+    { code: 'NAP', label: 'Naples (Capodichino)' },
     { code: 'BLQ', label: 'Bologna (Guglielmo Marconi)' }
 ];
 
@@ -33,6 +33,24 @@ const Home = () => {
         airport.code.toLowerCase().includes(originSearch.toLowerCase())
     );
 
+    const printCategory = (destinations) => {
+        for(const dest of destinations) {
+            switch (dest.category.toUpperCase()) {
+                case "MARE":
+                    dest.category = "SEA";
+                    break;
+                case "MONTAGNA":
+                    dest.category = "MOUNTAIN";
+                    break;
+                case "CITTA":
+                    dest.category = "CITY";
+                    break;
+                default:
+                    dest.category = "NOT SPECIFIED";
+            }
+        }
+    }
+
     const handleSearch = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -59,6 +77,7 @@ const Home = () => {
 
             if (data.success) {
                 setDestinations(data.data);
+                printCategory(data.data);
 
                 sessionStorage.setItem('search_origin', origin);
                 sessionStorage.setItem('search_originSearch', originSearch);
@@ -181,10 +200,10 @@ const Home = () => {
                     <div className="form-group">
                         <label>Category</label>
                         <select value={category} onChange={(e) => setCategory(e.target.value)}>
-                            <option value="Tutte">Tutte</option>
-                            <option value="mare">Mare</option>
-                            <option value="montagna">Montagna</option>
-                            <option value="citta">Città</option>
+                            <option value="Tutte">All</option>
+                            <option value="mare">Sea</option>
+                            <option value="montagna">Mountain</option>
+                            <option value="citta">City</option>
                         </select>
                     </div>
 
