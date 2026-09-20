@@ -14,7 +14,7 @@ import java.sql.SQLException;
 public class UserDAO {
 
     public boolean registerUser(User user){
-        String sql = "INSERT INTO User (username, email, password) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO user (username, email, password) VALUES (?, ?, ?)";
 
         try(Connection conn = ConnectionHandler.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql)){
@@ -43,7 +43,7 @@ public class UserDAO {
     public User checkCredentials(String username, String plainPassword){
         User user = null;
 
-        String sql = "SELECT id, username, email, password FROM User WHERE username = ?";
+        String sql = "SELECT id, username, email, password FROM user WHERE username = ?";
 
         try (Connection conn = ConnectionHandler.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

@@ -10,7 +10,7 @@ import fetch from 'node-fetch';
 
 const UNSPLASH_KEY = process.env.UNSPLASH_KEY;
 const TRAVELPAYOUTS_TOKEN = process.env.TRAVELPAYOUTS_TOKEN;
-const ORIGIN_IATA = ['FCO'];
+const ORIGIN_IATA = ['BLQ'];
 
 const targetDestinations = [
     { city: "Paris", iata: "CDG", category: "citta", description: "The City of Light, offering world-class art, fashion, and the iconic Eiffel Tower." },
@@ -105,7 +105,7 @@ async function runBot() {
 
             // 3. Retrieving flight prices from Travelpayouts
             for(const origin of ORIGIN_IATA) {
-                const pricesRes = await fetch(`https://api.travelpayouts.com/v1/prices/monthly?currency=EUR&origin=${ORIGIN_IATA}&destination=${dest.iata}&token=${TRAVELPAYOUTS_TOKEN}`);
+                const pricesRes = await fetch(`https://api.travelpayouts.com/v1/prices/monthly?currency=EUR&origin=${origin}&destination=${dest.iata}&token=${TRAVELPAYOUTS_TOKEN}`);
                 const pricesData = await pricesRes.json();
 
                 if (pricesData.success && pricesData.data) {
