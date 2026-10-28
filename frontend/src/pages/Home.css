@@ -78,7 +78,7 @@
 }
 
 .form-submit-btn {
-    background-color: #444;
+    background-color: #0544a8;
     color: white;
     border: none;
     padding: 0 25px;
@@ -101,7 +101,7 @@
 }
 
 .form-submit-btn:hover:not(:disabled) {
-    background-color: #333;
+    background-color: #03378a;
 }
 
 .form-submit-btn:active:not(:disabled) {

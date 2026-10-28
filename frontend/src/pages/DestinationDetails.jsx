@@ -23,7 +23,7 @@ const DestinationDetail = () => {
     const airbnbLink = `https://www.airbnb.com/s/${encodeURIComponent(dest.city)}/homes`;
 
     return (
-        <div className="destination-detail-container" style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+        <div className="destination-detail-container" style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
             <button onClick={() => navigate(-1)} style={{ marginBottom: '20px', cursor: 'pointer' }}>
                 Back to Results
             </button>
@@ -47,15 +47,15 @@ const DestinationDetail = () => {
             {/* Contenitore dei bottoni impilati verticalmente */}
             <div className="booking-actions">
                 <a href={skyscannerLink} target="_blank" rel="noopener noreferrer" className="skyscanner-btn">
-                    ✈️ Flights (Skyscanner)
+                    Flights (Skyscanner)
                 </a>
 
                 <a href={bookingLink} target="_blank" rel="noopener noreferrer" className="booking-btn">
-                    🏨 Hotels (Booking.com)
+                    Hotels (Booking.com)
                 </a>
 
                 <a href={airbnbLink} target="_blank" rel="noopener noreferrer" className="airbnb-btn">
-                    🏠 Rentals (Airbnb)
+                    Rentals (Airbnb)
                 </a>
             </div>
         </div>

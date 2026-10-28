@@ -30,19 +30,18 @@
 /* Layout VERTICALE per i bottoni di prenotazione */
 .booking-actions {
     display: flex;
-    flex-direction: column; /* Dispone gli elementi uno sotto l'altro */
-    gap: 20px;              /* Spazio verticale tra un bottone e l'altro */
+    justify-content: space-between ;
+    align-items: center;
     margin-top: 40px;
 }
 
 .booking-actions a {
-    width: 100%; /* Fa espandere i bottoni per tutta la larghezza */
+    width: 270px;
     box-sizing: border-box;
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 
-    /* Stili base dei bottoni (spostati dal JSX) */
     padding: 15px 24px;
     text-decoration: none;
     border-radius: 8px;
@@ -51,9 +50,9 @@
 }
 
 /* Colori specifici per ogni piattaforma */
-.skyscanner-btn { background-color: #0770e3; color: white; }
-.booking-btn    { background-color: #003580; color: white; }
-.airbnb-btn     { background-color: #FF5A5F; color: white; }
+.skyscanner-btn { background-color: #0544a8; color: white; }
+.booking-btn    { background-color: #0544a8; color: white; }
+.airbnb-btn     { background-color: #0544a8; color: white; }
 
 .booking-actions a:hover {
     transform: translateY(-3px);

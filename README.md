@@ -64,7 +64,7 @@ TripMatcher/
 
 ### 1. Configure the backend
 
-Create `backend/.env` for the database connection:
+Create `backend/src/main/resources/.env` for the database connection:
 
 ```dotenv
 DB_HOST=localhost
@@ -82,7 +82,7 @@ For a local MySQL installation, the import can be performed with:
 
 ```bash
 mysql -u your_database_user -p -e "CREATE DATABASE IF NOT EXISTS tripm CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;"
-mysql -u your_database_user -p tripm < database/tripmatcher-demo.sql
+mysql -u your_database_user -p tripm < database/tripmDB.sql
 ```
 
 Build the backend WAR:
@@ -165,4 +165,4 @@ The bot is not required for a first local run when the imported demo database al
 ## Current Limitations
 
 - Accommodation prices in the update script are algorithmically estimated rather than retrieved from a hotel-pricing provider.
-- The repository does not yet include database initialization files or automated tests.
+- The repository does not yet include automated tests.
