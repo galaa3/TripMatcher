@@ -160,7 +160,6 @@ The bot is not required for a first local run when the imported demo database al
 - `.env` files are excluded from version control. Do not commit database passwords or third-party API keys.
 - The database demo dump contains only non-personal, demonstration data; do not include real user accounts or email addresses.
 - The backend hashes account passwords with BCrypt before storing them.
-- If a secret is ever committed, revoke or rotate it immediately; removing it from a later commit is not sufficient.
 
 ## Current Limitations
 
