@@ -6,7 +6,7 @@ TripMatcher is a full-stack web application that helps users explore travel dest
 
 ## Features
 
-- Search destinations by departure airport, month, number of nights, maximum budget, and category (city, seaside, or mountain).
+- Search destinations by departure airport (the application implements only four possible departure airports until now), month, number of nights, maximum budget, and category (city, seaside, or mountain).
 - Calculate an estimated total cost from an average flight price and an average nightly accommodation price.
 - Browse destination cards and a detail page with an image, description, and outbound links to Skyscanner, Booking.com, and Airbnb.
 - Create an account, sign in, sign out, and retain the authenticated user in a server-side session.
@@ -33,23 +33,14 @@ The React frontend calls the Java backend through JSON endpoints. The backend us
 
 ## Tech Stack
 
-| Area | Technologies |
-| --- | --- |
-| Frontend | React, Vite, React Router, CSS |
-| Backend | Java 25, Maven, Jakarta Servlet API 6.1, Gson |
-| Data | MySQL, JDBC, DAO pattern |
-| Authentication | HTTP sessions, BCrypt |
-| Data update | Node.js, `mysql2`, `node-fetch`, `dotenv` |
-| External services used by the update script | Unsplash API, Travelpayouts API |
-
-## Project Structure
-
-```text
-TripMatcher/
-├── frontend/       # React/Vite single-page application
-├── backend/        # Java servlet application packaged as a WAR
-└── bot/            # Node.js script to populate/update destination data
-```
+| Area                                                        | Technologies |
+|-------------------------------------------------------------| --- |
+| Frontend                                                    | React, Vite, React Router, CSS |
+| Backend                                                     | Java 25, Maven, Jakarta Servlet API 6.1, Gson |
+| Data                                                        | MySQL, JDBC, DAO pattern |
+| Authentication                                              | HTTP sessions, BCrypt |
+| Data update                                                 | Node.js, `mysql2`, `node-fetch`, `dotenv` |
+| External services used for data update by the update script | Unsplash API, Travelpayouts API |
 
 ## Getting Started
 
@@ -74,9 +65,7 @@ DB_USER=your_database_user
 DB_PASSWORD=your_database_password
 ```
 
-The backend expects a user-account table together with `destination` and `price_trends`.
-
-> **Database setup:** create the `tripm` database and import the project's sanitized schema-and-demo-data dump before starting the application. The demo data must include records for `destination` and `price_trends`, otherwise valid searches can return no results. Database credentials and personal data must never be included in version control.
+> **Database setup:** create the `tripm` database and import the project's sanitized schema-and-demo-data dump before starting the application. The demo data must include records for `destination` and `price_trends`, otherwise valid searches can return no results.
 
 For a local MySQL installation, the import can be performed with:
 
@@ -94,11 +83,8 @@ mvn clean package
 
 Deploy the resulting WAR from `backend/target/` to your servlet container. The deployed context path depends on the application-server configuration.
 
-The CORS filter reads `FRONTEND_URL` directly from the application server environment, rather than from `backend/.env`. Set it to the address of the Vite frontend before starting the server:
+The CORS filter reads `FRONTEND_URL` directly from the application server environment or it uses the default frontend url for Vite.
 
-```dotenv
-FRONTEND_URL=http://localhost:5173
-```
 
 ### 2. Configure and start the frontend
 
@@ -141,7 +127,7 @@ npm ci
 node updateDestinations.js
 ```
 
-The bot is not required for a first local run when the imported demo database already contains destination and price-trend records. The update script currently requests flight data with Rome Fiumicino (`FCO`) as its configured origin. The application can search other origins when corresponding records are present in the database.
+The bot is not required for a first local run when the imported demo database already contains destination and price-trend records. If you want add some other data at database you can modify bot's script as you want.
 
 ## API Endpoints
 
@@ -155,13 +141,9 @@ The bot is not required for a first local run when the imported demo database al
 
 `POST /api/searchDestinations` accepts an `origin`, `month`, `nights`, `maxBudget`, and an optional `category`.
 
-## Security Notes
-
-- `.env` files are excluded from version control. Do not commit database passwords or third-party API keys.
-- The database demo dump contains only non-personal, demonstration data; do not include real user accounts or email addresses.
-- The backend hashes account passwords with BCrypt before storing them.
 
 ## Current Limitations
 
+- Flights prices are caching results of Travelpayouts API, they are not accurate.
 - Accommodation prices in the update script are algorithmically estimated rather than retrieved from a hotel-pricing provider.
 - The repository does not yet include automated tests.
