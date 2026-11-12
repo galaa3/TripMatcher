@@ -3,7 +3,7 @@ import './Home.css';
 import { useNavigate } from 'react-router-dom';
 
 const airportsList = [
-    { code: 'MIL', label: 'Milan (all airports)' },
+    { code: 'MIL', label: 'Milan (All airports)' },
     { code: 'FCO', label: 'Rome (Fiumicino)' },
     { code: 'NAP', label: 'Naples (Capodichino)' },
     { code: 'BLQ', label: 'Bologna (Guglielmo Marconi)' }
@@ -13,7 +13,7 @@ const Home = () => {
     const navigate = useNavigate();
 
     const [origin, setOrigin] = useState(() => sessionStorage.getItem('search_origin') || 'MIL');
-    const [originSearch, setOriginSearch] = useState(() => sessionStorage.getItem('search_originSearch') || 'Milano (Tutti gli aeroporti)');
+    const [originSearch, setOriginSearch] = useState(() => sessionStorage.getItem('search_originSearch') || 'Milano (All airports)');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const [month, setMonth] = useState(() => parseInt(sessionStorage.getItem('search_month')) || 8);
@@ -229,7 +229,7 @@ const Home = () => {
                             key={dest.id}
                             className="destination-card"
                             // handing the 'dest' and 'origin' objects (state object) to react (passing data to 'destination' page)
-                            onClick={() => navigate(`/destination/${dest.id}`, { state: { dest: dest, origin: origin } })}
+                            onClick={() => navigate(`/destination/${dest.id}`, { state: { dest: dest, origin: origin, month: month } }) }
                             style={{ border: '1px solid #ddd', borderRadius: '10px', padding: '15px', width: '300px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}
                         >
                             <img src={dest.imageUrl} alt={dest.city} style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px' }} />
@@ -239,7 +239,7 @@ const Home = () => {
                             </span>
 
                             <h4 style={{ color: '#2ecc71' }}>Starting from: {dest.totalEstimatedCost} €</h4>
-                            <p style={{ fontSize: '0.85em', color: '#666' }}>(Volo: {dest.avgFlight}€ + Hotel: {dest.avgAccomodation}€ a notte)</p>
+                            <p style={{ fontSize: '0.85em', color: '#666' }}>(Flight: {dest.avgFlight}€ + Hotel: {dest.avgAccomodation}€ a notte)</p>
                         </div>
                     ))}
                 </div>

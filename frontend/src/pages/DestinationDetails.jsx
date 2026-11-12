@@ -6,7 +6,12 @@ const DestinationDetail = () => {
     const navigate = useNavigate();
 
     // Retrieve the destination and origin passed from Home.jsx
-    const { dest, origin } = location.state || {};
+    const { dest, origin, month } = location.state || {};
+
+    //to build the skyscanner link
+    const year = String(new Date().getFullYear() + 1).slice(-2);
+    const formattedMonth = String(month).padStart(2, '0');
+    const yearMonth = `${year}${formattedMonth}`;
 
     if (!dest) {
         return (
@@ -18,7 +23,7 @@ const DestinationDetail = () => {
     }
 
     // Dynamic Deep Links Construction
-    const skyscannerLink = `https://www.skyscanner.it/trasporti/voli/${origin}/${dest.iataCode}`;
+    const skyscannerLink = `https://www.skyscanner.it/trasporti/voli/${origin}/${dest.iataCode}?oym=${yearMonth}&iym=${yearMonth}`;
     const bookingLink = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(dest.city)}`;
     const airbnbLink = `https://www.airbnb.com/s/${encodeURIComponent(dest.city)}/homes`;
 
